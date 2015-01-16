@@ -17,15 +17,15 @@ import (
 )
 
 type Flags struct {
-	URL     string
-	User    string
-	Pass    string
-	Agent   string
-	Project string
-        Revision string
-	Timeout time.Duration
-	Build   int
-	Prtg    bool
+	URL      string
+	User     string
+	Pass     string
+	Agent    string
+	Project  string
+	Revision string
+	Timeout  time.Duration
+	Build    int
+	Prtg     bool
 }
 
 // NewFlags creates default flag set. The values must be the same as the ones
@@ -55,9 +55,9 @@ func (mcli *MockCLI) ctx() *cli.Context {
 	g.Int("build", mcli.f.Build, "")
 	g.Bool("prtg", mcli.f.Prtg, "")
 
-        l := flag.NewFlagSet("local pulsecli test", flag.PanicOnError)
-        l.String("revision", mcli.f.Revision, "")
-        l.String("pass", mcli.f.Pass, "")
+	l := flag.NewFlagSet("local pulsecli test", flag.PanicOnError)
+	l.String("revision", mcli.f.Revision, "")
+	l.String("pass", mcli.f.Pass, "")
 
 	return cli.NewContext(mcli.cli.app, l, g)
 }
@@ -258,7 +258,7 @@ func TestInit(t *testing.T) {
 
 func TestInitErr_ProjectRegex(t *testing.T) {
 	mc, mcli, f := fixture()
-  mc.Err = make([]error, 1)
+	mc.Err = make([]error, 1)
 	f.Project = "("
 	out, err := mcli.Init()
 	mc.Check(t)

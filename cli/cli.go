@@ -93,25 +93,25 @@ func (fileStore) Save(c *Creds) error {
 }
 
 func matchProjects(cli *CLI, list []string) []string {
-        mp := make([]string, 0)
-        for _, p := range list {
-            if (cli.p == p) {
-                mp = append(mp, p)
-            }
-        }
-        if len(mp) == 0 {
-                var err error
-                var rp *regexp.Regexp
-                if rp, err = regexp.Compile(cli.p); err != nil {
-                         cli.Err(err)
-                }
-                for _, p := range list {
-                        if rp.MatchString(p) {
-                                mp = append(mp, p)
-                        }
-                }
-        }
-        return mp;
+	mp := make([]string, 0)
+	for _, p := range list {
+		if cli.p == p {
+			mp = append(mp, p)
+		}
+	}
+	if len(mp) == 0 {
+		var err error
+		var rp *regexp.Regexp
+		if rp, err = regexp.Compile(cli.p); err != nil {
+			cli.Err(err)
+		}
+		for _, p := range list {
+			if rp.MatchString(p) {
+				mp = append(mp, p)
+			}
+		}
+	}
+	return mp
 }
 
 // CLI is a facade that implements cmd/pulsecli tool.
@@ -155,29 +155,29 @@ func New() *CLI {
 	cl.app.Name, cl.app.Version = "pulsecli", "0.1.0"
 	cl.app.Usage = "a command-line client for a Pulse server"
 	cl.app.EnableBashCompletion = true
-        cl.app.Flags = []cli.Flag{
+	cl.app.Flags = []cli.Flag{
 		cli.StringFlag{Name: "url", Value: "http://pulse", Usage: "Pulse Remote API endpoint"},
 		cli.StringFlag{Name: "agent, a", Value: ".*", Usage: "Agent name pattern"},
 		cli.StringFlag{Name: "project, p", Value: ".*", Usage: `Project name pattern (or "personal")`},
 		cli.StringFlag{Name: "stage, s", Value: ".*", Usage: "Stage name pattern"},
 		cli.StringFlag{Name: "timeout, t", Value: "15s", Usage: "Maximum wait time"},
 		cli.IntFlag{Name: "build, b", Usage: "Build number"},
-                cli.BoolFlag{Name: "prtg", Usage: "PRTG-friendly output"},
+		cli.BoolFlag{Name: "prtg", Usage: "PRTG-friendly output"},
 	}
-        loginFlags := []cli.Flag{
-             cli.StringFlag{Name: "user", Usage: "Pulse user name"},
-             cli.StringFlag{Name: "pass", Usage: "Pulse user password"},
-        }
-        personalFlags := []cli.Flag{
-            cli.StringFlag{Name: "patch", Usage: "Patch file for a personal build"},
-            cli.StringFlag{Name: "revision, r", Value: "HEAD", Usage: "Revision to use for personal build"},
-        }
-        artifactsFlags := []cli.Flag{cli.StringFlag{Name: "output, o", Value: ".", Usage: "Output for fetched artifacts"}}
+	loginFlags := []cli.Flag{
+		cli.StringFlag{Name: "user", Usage: "Pulse user name"},
+		cli.StringFlag{Name: "pass", Usage: "Pulse user password"},
+	}
+	personalFlags := []cli.Flag{
+		cli.StringFlag{Name: "patch", Usage: "Patch file for a personal build"},
+		cli.StringFlag{Name: "revision, r", Value: "HEAD", Usage: "Revision to use for personal build"},
+	}
+	artifactsFlags := []cli.Flag{cli.StringFlag{Name: "output, o", Value: ".", Usage: "Output for fetched artifacts"}}
 	cl.app.Commands = []cli.Command{{
 		Name:   "login",
 		Usage:  "Creates or updates session for current user",
 		Action: cl.Login,
-                Flags:  loginFlags,
+		Flags:  loginFlags,
 	}, {
 		Name:   "trigger",
 		Usage:  "Triggers a build",
@@ -222,12 +222,12 @@ func New() *CLI {
 		Name:   "personal",
 		Usage:  "Sends a personal build request",
 		Action: cl.Personal,
-                Flags:  personalFlags,
+		Flags:  personalFlags,
 	}, {
 		Name:   "artifact",
 		Usage:  "Downloads all the artifact files",
 		Action: cl.Artifact,
-                Flags:  artifactsFlags,
+		Flags:  artifactsFlags,
 	}}
 	return cl
 }
@@ -237,24 +237,27 @@ func (cli *CLI) init(ctx *cli.Context) error {
 		cli.Err, cli.Out = prtg.Err, prtg.Out
 	}
 	var err, err2 error
-  
-  if ctx.IsSet("user") && ctx.IsSet("pass") {
-    cli.cred = &Creds{ctx.GlobalString("url"), ctx.String("user"), ctx.String("pass")}
-    if cli.c, err = cli.Client(cli.cred.URL, cli.cred.User, cli.cred.Pass); err != nil {
-		  if cli.cred, err2 = cli.Store.Load(); err2 == nil {
-		    cli.c, err = cli.Client(cli.cred.URL, cli.cred.User, cli.cred.Pass)
-        fmt.Println("WARNING: Authentification failed. Use valid credentials previously stored.")
-	    } else {
-        return err
-      }
-	  }
-  } else {
-    if cli.cred, err = cli.Store.Load(); err == nil {
-		  cli.c, err = cli.Client(cli.cred.URL, cli.cred.User, cli.cred.Pass)
-	  } else {
-      return err
-    }
-  }
+
+	if ctx.IsSet("user") && ctx.IsSet("pass") {
+		cli.cred = &Creds{ctx.GlobalString("url"), ctx.String("user"), ctx.String("pass")}
+		if cli.c, err = cli.Client(cli.cred.URL, cli.cred.User, cli.cred.Pass); err != nil {
+			if cli.cred, err2 = cli.Store.Load(); err2 == nil {
+				cli.c, err = cli.Client(cli.cred.URL, cli.cred.User, cli.cred.Pass)
+				fmt.Println("WARNING: Authentification failed. Use valid credentials previously stored.")
+			} else {
+				return err
+			}
+		}
+	} else {
+		if cli.cred, err = cli.Store.Load(); err == nil {
+			cli.c, err = cli.Client(cli.cred.URL, cli.cred.User, cli.cred.Pass)
+			if err != nil {
+				return err
+			}
+		} else {
+			return err
+		}
+	}
 	cli.p = ctx.GlobalString("project")
 	a, s, o := ctx.GlobalString("agent"), ctx.GlobalString("stage"), ctx.GlobalString("output")
 	if cli.a, err = regexp.Compile(a); err != nil {
@@ -526,10 +529,10 @@ func (cli *CLI) healthProject(ctx *cli.Context) {
 	for _, p := range matchProjects(cli, p) {
 		id, err := util.NormalizeBuildOrRequestID(cli.c, p, cli.n)
 		if err != nil {
-      if err.(*pulse.InvalidBuildError).Status == pulse.BuildNeverBuilt {
-        fmt.Println("Build",p,"never has been built.")
-        continue
-      }
+			if err.(*pulse.InvalidBuildError).Status == pulse.BuildNeverBuilt {
+				fmt.Println("Build", p, "never has been built.")
+				continue
+			}
 			cli.Err(err)
 			return
 		}

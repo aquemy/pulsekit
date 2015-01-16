@@ -184,7 +184,7 @@ func (c *client) LatestBuildResult(project string) (res []BuildResult, err error
 	if err != nil {
 		return nil, err
 	}
-  if res == nil || len(res) == 0 {
+	if res == nil || len(res) == 0 {
 		return nil, &InvalidBuildError{Status: BuildNeverBuilt}
 	}
 	return res, nil
