@@ -243,6 +243,9 @@ func (cli *CLI) init(ctx *cli.Context) error {
 		if cli.c, err = cli.Client(cli.cred.URL, cli.cred.User, cli.cred.Pass); err != nil {
 			if cli.cred, err2 = cli.Store.Load(); err2 == nil {
 				cli.c, err = cli.Client(cli.cred.URL, cli.cred.User, cli.cred.Pass)
+				if err != nil {
+					return err
+				}
 				fmt.Println("WARNING: Authentification failed. Use valid credentials previously stored.")
 			} else {
 				return err
